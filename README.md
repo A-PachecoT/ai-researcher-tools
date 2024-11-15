@@ -11,6 +11,13 @@ This toolkit addresses the need for AI agents to efficiently access and process 
 - Managing rate limits and API constraints
 - Enabling efficient deduplication of results
 
+## 👥 Team
+
+| Role            | Name             | GitHub                                              |
+|----------------|------------------|-----------------------------------------------------|
+| Main Developer | Jared Orihuela   | [@JaocHatter](https://github.com/JaocHatter)       |
+| Maintainer     | André Pacheco    | [@A-PachecoT](https://github.com/A-PachecoT)       |
+
 ## ⚡ Quick Start
 ```bash
 pip install requests beautifulsoup4 arxiv
