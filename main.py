@@ -10,13 +10,10 @@ def main():
 
     # Define query
     query = "ReAct for LLMs"
-    # Example searches
+    
+    # Get results from all sources
     arxiv_results = arxiv.get_results(query)
-    
-    # PLOS requires a specific API URL format
-    plos_url = f"https://api.plos.org/search?q=title:{query}&fl=id,abstract,title,author,publication_date,reference&wt=json"
-    plos_results = plos.get_results(plos_url)
-    
+    plos_results = plos.get_results(query)
     pmc_results = pmc.get_results(query)
 
     # Print sample results
