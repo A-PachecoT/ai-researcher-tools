@@ -103,6 +103,9 @@ The results are returned in a standardized format, making it easy to integrate w
 - Relevance sorting
 - Deduplication
 
+## Limitations
+- Arxiv does not provide references in the API, so it is not included in the reference list.
+
 ## 📝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
