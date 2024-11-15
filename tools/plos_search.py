@@ -3,8 +3,15 @@ import requests
 from .base_searcher import BaseSearcher, Article, Reference
 
 class PlosSearcher(BaseSearcher):
+    BASE_URL = "https://api.plos.org/search"
+    
     def get_results(self, query: str) -> List[Article]:
-        response = requests.get(query, headers={"User-Agent": "Research Buddy"})
+        params = {
+            "q": f"title:{query}",
+            "fl": "id,abstract,title,author,publication_date,reference",
+            "wt": "json"
+        }
+        response = requests.get(self.BASE_URL, params=params, headers={"User-Agent": "Research Buddy"})
         docs = response.json()['response']['docs']
         return self._process_documents(docs)
     
