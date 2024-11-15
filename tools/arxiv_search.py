@@ -1,31 +1,37 @@
+from typing import List
 import arxiv
+from .base_searcher import BaseSearcher, Article, Reference
 
-class ArxivSearcher:
-    def __init__(self, query, max_results=10, criterion = arxiv.SortCriterion.Relevance):
+class ArxivSearcher(BaseSearcher):
+    def __init__(self, max_results: int = 10, criterion: arxiv.SortCriterion = arxiv.SortCriterion.Relevance):
+        super().__init__(max_results)
         self.client = arxiv.Client()
         self.criterion = criterion
-        self.ops = []
-        self.max_results = max_results
-    def get_results(self, query):
-      self.search = arxiv.Search(
+
+    def get_results(self, query: str) -> List[Article]:
+        search = arxiv.Search(
             query=query,
-            max_results = self.max_results,
-            sort_by = self.criterion
+            max_results=self.max_results,
+            sort_by=self.criterion
         )
-      results = list(self.client.results(self.search))
-      results_values = []
-      seen_ids = set()  
-      for elem in results:
-        content = {}
-        content["title"] = elem.title
-        content["author"] = list(map(lambda x: x.name,elem.authors))
-        content["summary"] = elem.summary
-        content["year"] = elem.updated.year
-        content["url"] = elem.entry_id
-        content["reference"] = []
-        if content["url"] in seen_ids:
-          continue  # Saltar si ya hemos visto este ID
-        else:
-          seen_ids.add(content["url"])  # Agregar el ID al conjunto si es nuevo
-          results_values.append(content)
-      return results_values
+        
+        results = list(self.client.results(search))
+        articles = []
+        seen_ids = set()
+        
+        for result in results:
+            if result.entry_id in seen_ids:
+                continue
+                
+            seen_ids.add(result.entry_id)
+            articles.append(Article(
+                title=result.title,
+                authors=[author.name for author in result.authors],
+                summary=result.summary,
+                year=str(result.updated.year),
+                url=result.entry_id,
+                references=[],
+                id=result.entry_id
+            ))
+            
+        return articles
