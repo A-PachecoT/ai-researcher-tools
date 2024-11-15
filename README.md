@@ -20,10 +20,17 @@ This toolkit addresses the need for AI agents to efficiently access and process 
 
 ## ⚡ Quick Start
 ```bash
-pip install requests beautifulsoup4 arxiv
+pip install requests beautifulsoup4 arxiv lxml
 ```
+Or install all dependencies:
+```bash
+pip install -r requirements.txt
+```
+
 ```python
-from search_toolkit import PubMedSearcher, PlosSearcher, ArxivSearcher
+from tools.arxiv_search import ArxivSearcher
+from tools.plos_search import PlosSearcher
+from tools.pmc_search import PubMedSearcher
 
 # Initialize searchers
 pmc = PubMedSearcher(max_results=10)
@@ -31,87 +38,70 @@ plos = PlosSearcher(max_results=10)
 arxiv = ArxivSearcher(max_results=10)
 
 # Perform searches
-pmc_results = pmc.get_results("machine learning")
-plos_results = plos.get_results("your_plos_api_url")
-arxiv_results = arxiv.get_results("artificial intelligence")
+query = "machine learning"
+pmc_results = pmc.get_results(query)
+plos_results = plos.get_results(query)
+arxiv_results = arxiv.get_results(query)
 ```
 
 ## 🔧 Components
+
+### Base Searcher
+- Abstract base class defining the interface for all searchers
+- Standardizes result format and search parameters
+- Enforces consistent implementation across providers
 
 ### PubMed Central Searcher
 - Accesses the EuropePMC API for open access papers
 - Retrieves full text and structured references
 - Handles XML parsing for content extraction
+- Focuses on open access content with DOIs and PMCIDs
 
 ### PLOS Searcher
 - Interfaces with PLOS API
 - Processes structured reference information
-- Manages pagination and result limits
+- Provides title-based search functionality
 
 ### arXiv Searcher
-- Implements arXiv API integration
+- Implements arXiv API integration via arxiv.py
 - Supports relevance-based sorting
-- Includes automatic deduplication
+- Includes automatic deduplication of results
 
-## 📊 Data Format
+## 📊 Data Structure
 
-All searchers return results in a consistent format optimized for AI processing:
+All searchers return results using these standardized dataclasses:
 
-The results are returned in a standardized format, making it easy to integrate with other AI systems.
 ```python
-{
-    "id": "10.1234/example.2023.123",  # Unique paper identifier (e.g., DOI)
-    "title": "Deep Learning Applications in Natural Language Processing",
-    "author": ["Jane Smith", "John Doe", "Alice Johnson"],  # List of authors
-    "summary": "This paper explores recent advances in applying deep learning techniques to natural language processing tasks...", 
-    "year": "2023",  # Publication year
-    "url": "https://doi.org/10.1234/example.2023.123",  # Direct link to paper
-    "reference": [  # List of cited papers
-        {
-            "title": "Attention Is All You Need",
-            "author": ["Vaswani, A.", "Shazeer, N.", "Parmar, N."],
-            "year": "2017",
-            "journal": "NeurIPS"
-        },
-        {
-            "title": "BERT: Pre-training of Deep Bidirectional Transformers",
-            "author": ["Devlin, J.", "Chang, M.W."],
-            "year": "2019", 
-            "journal": "NAACL"
-        }
-    ]
-}
-```
+@dataclass
+class Reference:
+    title: str
+    authors: List[str]
+    year: str
+    journal: str = ""
 
+@dataclass
+class Article:
+    title: str
+    authors: List[str]
+    summary: str
+    year: str
+    url: str
+    references: List[Reference]
+    id: str = ""
+```
 
 ## 🚀 Features
 
-- **Unified Interface**: Consistent API across all search providers
-- **Rich Metadata**: Comprehensive paper information including references
-- **AI-Optimized**: Structured output format for easy parsing
+- **Unified Interface**: Common BaseSearcher abstract class
+- **Rich Metadata**: Comprehensive paper information including references where available
 - **Configurable**: Adjustable result limits and search criteria
-- **Error Handling**: Robust error management for API failures
-- **Rate Limiting**: Built-in rate limit compliance
-
-## 🛠️ Technical Details
-
-### Supported Metadata
-- Paper titles and DOIs
-- Author information
-- Abstracts and summaries
-- Publication dates
-- Reference lists
-- Direct URLs to papers
-
-### Search Capabilities
-- Full-text search
-- Author-based search
-- Date range filtering
-- Relevance sorting
-- Deduplication
+- **Error Handling**: Built-in error management
+- **Deduplication**: Automatic removal of duplicate results (implemented in ArXiv searcher)
 
 ## Limitations
-- Arxiv does not provide references in the API, so it is not included in the reference list.
+- ArXiv API does not provide reference information
+- PLOS search is currently limited to title-based queries
+- PubMed Central searcher only retrieves open access articles
 
 ## 📝 Contributing
 
@@ -120,9 +110,3 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🔗 Related Projects
-
-- [arxiv.py](https://github.com/lukasschwab/arxiv.py)
-- [europepmc](https://europepmc.org/RestfulWebService)
-- [PLOS API](https://api.plos.org/)
